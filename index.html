@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Caderno Financeiro</title>
+<meta name="theme-color" content="#1E2E23" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Caderno" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231E2E23'/%3E%3Ctext x='32' y='42' font-size='26' font-family='Georgia,serif' fill='%23D4A017' text-anchor='middle'%3ER%24%3C/text%3E%3C/svg%3E" />
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231E2E23'/%3E%3Ctext x='32' y='42' font-size='26' font-family='Georgia,serif' fill='%23D4A017' text-anchor='middle'%3ER%24%3C/text%3E%3C/svg%3E" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<style>
+  :root{
+    --ink:#1E2E23; --paper:#FAF8F3; --line:#E4DFD3; --gold:#D4A017;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;}
+  .serif{font-family:'Fraunces',serif;font-weight:600;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  .wrap{max-width:640px;margin:0 auto;padding-bottom:60px;}
+  header{background:var(--ink);color:var(--paper);padding:28px 20px 24px;border-radius:0 0 24px 24px;}
+  .eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.8;display:flex;gap:6px;align-items:center;margin-bottom:6px;}
+  .total{font-size:38px;line-height:1.1;}
+  .subrow{display:flex;gap:10px;align-items:center;font-size:14px;opacity:.9;margin-top:8px;flex-wrap:wrap;}
+  .pill{padding:2px 10px;border-radius:999px;font-size:12px;}
+  .up{background:rgba(193,68,14,.28);} .down{background:rgba(47,111,94,.35);}
+  .avgline{font-size:12px;opacity:.65;margin-top:4px;}
+  .content{padding:0 16px;margin-top:-12px;}
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px;}
+  .card h3{margin:0 0 10px;font-size:16px;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+  input,select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:10px;font-size:14px;background:#fff;color:var(--ink);font-family:inherit;}
+  input:focus,select:focus,button:focus-visible{outline:none;box-shadow:0 0 0 2px var(--gold);}
+  .amountRow{display:flex;gap:8px;}
+  button{cursor:pointer;border:none;font-family:inherit;}
+  .btnAdd{background:var(--ink);color:var(--paper);border-radius:10px;padding:0 18px;font-size:14px;font-weight:500;display:flex;align-items:center;gap:6px;}
+  .desc{margin-bottom:8px;}
+  .error{font-size:12px;color:#B23A48;background:#fdf1f1;border:1px solid #f2caca;border-radius:10px;padding:8px 10px;margin-bottom:12px;}
+  .empty{border:1px dashed var(--line);border-radius:16px;padding:22px;text-align:center;background:#fff;}
+  .insightTitle{display:flex;gap:8px;align-items:center;margin-bottom:6px;font-size:14px;}
+  .insightTitle .ic{font-size:16px;}
+  .p70{opacity:.72;font-size:14px;}
+  .tabs{display:flex;gap:8px;margin-bottom:10px;}
+  .tab{font-size:12px;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--paper);color:var(--ink);}
+  .tab.active{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+  canvas{max-height:220px;}
+  .dateLabel{font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.05em;opacity:.5;margin:10px 0 4px;}
+  .txn{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px dotted var(--line);}
+  .catIcon{width:24px;height:24px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;}
+  .txnDesc{flex:1;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .txnAmount{font-family:'IBM Plex Mono',monospace;font-size:14px;}
+  .delBtn{background:none;color:#00000055;padding:4px;border-radius:6px;flex-shrink:0;}
+  .delBtn.confirm{color:#B23A48;}
+  .ledgerScroll{max-height:420px;overflow-y:auto;padding-right:2px;}
+  .backupRow{display:flex;gap:8px;}
+  .btnGhost{flex:1;background:var(--paper);border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:9px;font-size:13px;font-weight:500;}
+  .fileInput{display:none;}
+  .footnote{font-size:11px;opacity:.55;margin-top:8px;line-height:1.4;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">💰 Caderno Financeiro</div>
+    <div class="total serif" id="totalCurrent">R$ 0,00</div>
+    <div class="subrow">
+      <span id="monthLabel"></span>
+      <span class="pill" id="pctPill" style="display:none;"></span>
+    </div>
+    <div class="avgline mono" id="avgLine"></div>
+  </header>
+
+  <div class="content">
+    <form class="card" id="expenseForm">
+      <h3 class="serif">Novo gasto</h3>
+      <div class="row2">
+        <input type="date" id="fDate" required />
+        <select id="fCategory"></select>
+      </div>
+      <div class="desc"><input type="text" id="fDesc" placeholder="Descrição (opcional)" /></div>
+      <div class="amountRow">
+        <input type="text" inputmode="decimal" id="fAmount" placeholder="0,00" class="mono" required />
+        <button type="submit" class="btnAdd">+ Salvar</button>
+      </div>
+    </form>
+
+    <div id="errorBox"></div>
+    <div id="emptyState"></div>
+    <div id="insights"></div>
+
+    <div class="card" id="chartsCard" style="display:none;">
+      <div class="tabs">
+        <button class="tab active" data-view="categoria">Por categoria</button>
+        <button class="tab" data-view="tendencia">Últimos 30 dias</button>
+      </div>
+      <canvas id="chartCanvas" height="220"></canvas>
+    </div>
+
+    <div class="card" id="ledgerCard" style="display:none;">
+      <h3 class="serif">Registro</h3>
+      <div class="ledgerScroll" id="ledger"></div>
+    </div>
+
+    <div class="card">
+      <h3 class="serif">Backup</h3>
+      <div class="backupRow">
+        <button type="button" class="btnGhost" id="exportBtn">⬇ Exportar backup</button>
+        <button type="button" class="btnGhost" id="importBtn">⬆ Importar backup</button>
+        <input type="file" accept="application/json" class="fileInput" id="importFile" />
+      </div>
+      <div class="footnote">Seus dados ficam salvos só neste navegador/aparelho. Exporte de vez em quando para não perder nada se limpar os dados do navegador ou trocar de celular.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const CATEGORIES = [
+  { id:"alimentacao", label:"Alimentação", icon:"🍽️", color:"#D4A017" },
+  { id:"transporte", label:"Transporte", icon:"🚗", color:"#2F6F5E" },
+  { id:"combustivel", label:"Combustível", icon:"⛽", color:"#C1440E" },
+  { id:"moradia", label:"Moradia", icon:"🏠", color:"#4A5D4E" },
+  { id:"lazer", label:"Lazer", icon:"🎬", color:"#A67C52" },
+  { id:"saude", label:"Saúde", icon:"❤️", color:"#B23A48" },
+  { id:"compras", label:"Compras", icon:"🛍️", color:"#3D5A80" },
+  { id:"outros", label:"Outros", icon:"⋯", color:"#8C8C7A" },
+];
+const CAT_MAP = Object.fromEntries(CATEGORIES.map(c=>[c.id,c]));
+const STORAGE_KEY = "caderno-financeiro:expenses";
+
+const todayISO = () => new Date().toISOString().slice(0,10);
+const fmtBRL = n => "R$ " + (Number(n)||0).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtDM = s => { const [,m,d]=s.split("-"); return `${d}/${m}`; };
+const daysBetween = (a,b) => Math.round((new Date(b)-new Date(a))/86400000);
+
+let expenses = [];
+let confirmId = null;
+let chartView = "categoria";
+let chartInstance = null;
+
+function load(){
+  try{ expenses = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); }
+  catch{ expenses = []; }
+}
+function save(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(expenses)); document.getElementById("errorBox").innerHTML=""; }
+  catch{ document.getElementById("errorBox").innerHTML = '<div class="error">Não consegui salvar. O armazenamento do navegador pode estar cheio ou bloqueado.</div>'; }
+}
+
+function populateCategorySelect(){
+  const sel = document.getElementById("fCategory");
+  sel.innerHTML = CATEGORIES.map(c=>`<option value="${c.id}">${c.icon} ${c.label}</option>`).join("");
+}
+
+function addExpense(e){
+  e.preventDefault();
+  const date = document.getElementById("fDate").value;
+  const category = document.getElementById("fCategory").value;
+  const description = document.getElementById("fDesc").value.trim();
+  const amount = parseFloat(document.getElementById("fAmount").value.replace(",", "."));
+  if(!amount || amount<=0 || !date) return;
+  expenses.push({ id: Date.now().toString(36)+Math.random().toString(36).slice(2,6), date, category, description, amount });
+  save();
+  document.getElementById("fDesc").value="";
+  document.getElementById("fAmount").value="";
+  render();
+}
+
+function deleteExpense(id){
+  if(confirmId !== id){ confirmId = id; render(); return; }
+  expenses = expenses.filter(x=>x.id!==id);
+  confirmId = null;
+  save();
+  render();
+}
+
+function monthKeyOf(d){ return d.toISOString().slice(0,7); }
+
+function computeAll(){
+  const now = new Date();
+  const currentMonthKey = monthKeyOf(now);
+  const prevMonthKey = monthKeyOf(new Date(now.getFullYear(), now.getMonth()-1, 1));
+  const currentMonthExpenses = expenses.filter(e=>e.date.slice(0,7)===currentMonthKey);
+  const prevMonthExpenses = expenses.filter(e=>e.date.slice(0,7)===prevMonthKey);
+  const totalCurrent = currentMonthExpenses.reduce((s,e)=>s+e.amount,0);
+  const totalPrev = prevMonthExpenses.reduce((s,e)=>s+e.amount,0);
+  const pctDiff = totalPrev>0 ? ((totalCurrent-totalPrev)/totalPrev)*100 : null;
+  const avgDaily = now.getDate()>0 ? totalCurrent/now.getDate() : 0;
+
+  const sumsCur = {}; currentMonthExpenses.forEach(e=>sumsCur[e.category]=(sumsCur[e.category]||0)+e.amount);
+  const breakdownCurrent = Object.entries(sumsCur).map(([category,total])=>({category,total})).sort((a,b)=>b.total-a.total);
+  const sumsPrev = {}; prevMonthExpenses.forEach(e=>sumsPrev[e.category]=(sumsPrev[e.category]||0)+e.amount);
+
+  let biggestIncrease = null;
+  if(prevMonthExpenses.length>0){
+    breakdownCurrent.forEach(({category,total})=>{
+      const diff = total - (sumsPrev[category]||0);
+      if(diff>0 && (!biggestIncrease || diff>biggestIncrease.diff)) biggestIncrease={category,diff,total};
+    });
+  }
+
+  const fuelEntries = expenses.filter(e=>e.category==="combustivel").sort((a,b)=> a.date>b.date?1:-1);
+  let fuelInsight = { status: fuelEntries.length===0?"none": fuelEntries.length===1?"one":"none" };
+  if(fuelEntries.length>=2){
+    const intervals=[];
+    for(let i=1;i<fuelEntries.length;i++) intervals.push(daysBetween(fuelEntries[i-1].date, fuelEntries[i].date));
+    const avg = Math.round(intervals.reduce((a,b)=>a+b,0)/intervals.length);
+    const last = fuelEntries[fuelEntries.length-1];
+    const sinceLast = daysBetween(last.date, todayISO());
+    fuelInsight = { status:"ready", avg, sinceLast, overdue: sinceLast>avg+2, lastDate:last.date };
+  }
+
+  const dailyTrend = [];
+  for(let i=29;i>=0;i--){
+    const d = new Date(); d.setDate(d.getDate()-i);
+    const key = d.toISOString().slice(0,10);
+    const total = expenses.filter(e=>e.date===key).reduce((s,e)=>s+e.amount,0);
+    dailyTrend.push({ date:key, label:fmtDM(key), total: Math.round(total*100)/100 });
+  }
+
+  return { now, totalCurrent, totalPrev, pctDiff, avgDaily, breakdownCurrent, biggestIncrease, fuelInsight, dailyTrend };
+}
+
+function render(){
+  const d = computeAll();
+
+  document.getElementById("totalCurrent").textContent = fmtBRL(d.totalCurrent);
+  document.getElementById("monthLabel").textContent = "gasto em " + d.now.toLocaleDateString("pt-BR",{month:"long"});
+  const pctPill = document.getElementById("pctPill");
+  if(d.pctDiff!==null){
+    pctPill.style.display="inline-block";
+    pctPill.className = "pill " + (d.pctDiff>0?"up":"down");
+    pctPill.textContent = (d.pctDiff>0?"▲ ":"▼ ") + Math.abs(d.pctDiff).toFixed(0) + "% vs mês passado";
+  } else pctPill.style.display="none";
+  document.getElementById("avgLine").textContent = "média diária: " + fmtBRL(d.avgDaily);
+
+  const emptyEl = document.getElementById("emptyState");
+  const insightsEl = document.getElementById("insights");
+  const chartsCard = document.getElementById("chartsCard");
+  const ledgerCard = document.getElementById("ledgerCard");
+
+  if(expenses.length===0){
+    emptyEl.innerHTML = `<div class="empty"><div class="serif" style="font-size:18px;margin-bottom:4px;">Ainda em branco</div><p class="p70">Registre seu primeiro gasto acima. A cada abastecimento anotado, este caderno passa a te dizer de quanto em quanto tempo você costuma colocar gasolina — e outros padrões parecidos.</p></div>`;
+    insightsEl.innerHTML=""; chartsCard.style.display="none"; ledgerCard.style.display="none";
+    return;
+  }
+  emptyEl.innerHTML=""; chartsCard.style.display="block"; ledgerCard.style.display="block";
+
+  // insights
+  let fuelHtml = "";
+  if(d.fuelInsight.status==="none") fuelHtml = `<p class="p70">Registre gastos na categoria Combustível para eu começar a calcular de quanto em quanto tempo você abastece.</p>`;
+  else if(d.fuelInsight.status==="one") fuelHtml = `<p class="p70">Encontrei 1 abastecimento. Registre o próximo para eu calcular sua frequência média.</p>`;
+  else fuelHtml = `<p style="font-size:14px;">Você costuma abastecer a cada <span class="mono" style="font-weight:600;">${d.fuelInsight.avg} dias</span>. Já se passaram <span class="mono" style="font-weight:600;">${d.fuelInsight.sinceLast} dias</span> desde o último, em ${fmtDM(d.fuelInsight.lastDate)}.${d.fuelInsight.overdue?`<span style="display:block;margin-top:4px;font-weight:600;color:#C1440E;">Isso está acima do seu padrão — talvez esteja perto de precisar abastecer.</span>`:""}</p>`;
+
+  let saveHtml = "";
+  if(d.biggestIncrease){
+    saveHtml = `<p class="p70" style="opacity:.9;">Seus gastos com <strong>${CAT_MAP[d.biggestIncrease.category].label}</strong> subiram <span class="mono" style="font-weight:600;">${fmtBRL(d.biggestIncrease.diff)}</span> em relação ao mês passado. É o maior aumento do mês — um bom ponto de partida para cortar gastos.</p>`;
+  } else if(d.breakdownCurrent.length>0){
+    saveHtml = `<p class="p70">Seu maior gasto este mês é com <strong>${CAT_MAP[d.breakdownCurrent[0].category].label}</strong> (${fmtBRL(d.breakdownCurrent[0].total)}). Continue registrando para eu comparar com o mês que vem.</p>`;
+  } else saveHtml = `<p class="p70">Sem dados suficientes ainda.</p>`;
+
+  insightsEl.innerHTML = `
+    <div class="card"><div class="insightTitle" style="color:#C1440E;"><span class="ic">⛽</span><span class="serif">Padrão de abastecimento</span></div>${fuelHtml}</div>
+    <div class="card"><div class="insightTitle" style="color:#D4A017;"><span class="ic">📈</span><span class="serif">Onde economizar</span></div>${saveHtml}</div>
+  `;
+
+  renderChart(d);
+  renderLedger();
+}
+
+function renderChart(d){
+  const ctx = document.getElementById("chartCanvas");
+  if(chartInstance) chartInstance.destroy();
+  if(chartView==="categoria"){
+    const labels = d.breakdownCurrent.map(b=>CAT_MAP[b.category].label);
+    const data = d.breakdownCurrent.map(b=>Math.round(b.total*100)/100);
+    const colors = d.breakdownCurrent.map(b=>CAT_MAP[b.category].color);
+    chartInstance = new Chart(ctx, { type:"bar", data:{ labels, datasets:[{ data, backgroundColor:colors, borderRadius:6 }] },
+      options:{ plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>fmtBRL(c.raw)}}}, scales:{ y:{ ticks:{font:{size:10}}}, x:{ ticks:{font:{size:10}} } } } });
+  } else {
+    const labels = d.dailyTrend.map(t=>t.label);
+    const data = d.dailyTrend.map(t=>t.total);
+    chartInstance = new Chart(ctx, { type:"line", data:{ labels, datasets:[{ data, borderColor:"#D4A017", backgroundColor:"#D4A01722", tension:.3, pointRadius:0, fill:true }] },
+      options:{ plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>fmtBRL(c.raw)}}}, scales:{ y:{ ticks:{font:{size:10}}}, x:{ ticks:{font:{size:9}, maxTicksLimit:8} } } } });
+  }
+}
+
+function renderLedger(){
+  const byDate = {};
+  [...expenses].sort((a,b)=> a.date<b.date?1:-1).forEach(e=>{ (byDate[e.date]=byDate[e.date]||[]).push(e); });
+  const entries = Object.entries(byDate).slice(0,60);
+  const el = document.getElementById("ledger");
+  el.innerHTML = entries.map(([date, items])=>{
+    const label = new Date(date+"T00:00:00").toLocaleDateString("pt-BR",{weekday:"short",day:"2-digit",month:"short"});
+    const rows = items.map(e=>{
+      const cat = CAT_MAP[e.category];
+      const isConfirm = confirmId===e.id;
+      return `<div class="txn">
+        <span class="catIcon" style="background:${cat.color}22;color:${cat.color};">${cat.icon}</span>
+        <span class="txnDesc">${(e.description || cat.label).replace(/</g,"&lt;")}</span>
+        <span class="txnAmount">${fmtBRL(e.amount)}</span>
+        <button class="delBtn ${isConfirm?"confirm":""}" data-id="${e.id}">${isConfirm?"✓":"🗑"}</button>
+      </div>`;
+    }).join("");
+    return `<div class="dateLabel">${label}</div>${rows}`;
+  }).join("");
+  el.querySelectorAll(".delBtn").forEach(btn=>{
+    btn.addEventListener("click", ()=> deleteExpense(btn.dataset.id));
+  });
+}
+
+// backup
+function exportBackup(){
+  const blob = new Blob([JSON.stringify(expenses, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `caderno-financeiro-backup-${todayISO()}.json`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+function importBackup(file){
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const imported = JSON.parse(reader.result);
+      if(!Array.isArray(imported)) throw new Error("formato inválido");
+      const existingIds = new Set(expenses.map(e=>e.id));
+      const merged = [...expenses, ...imported.filter(e=>e && e.id && !existingIds.has(e.id))];
+      expenses = merged;
+      save();
+      render();
+    }catch(err){
+      document.getElementById("errorBox").innerHTML = '<div class="error">Esse arquivo não parece ser um backup válido.</div>';
+    }
+  };
+  reader.readAsText(file);
+}
+
+// init
+document.addEventListener("DOMContentLoaded", ()=>{
+  populateCategorySelect();
+  document.getElementById("fDate").value = todayISO();
+  document.getElementById("fDate").max = todayISO();
+  load();
+  render();
+
+  document.getElementById("expenseForm").addEventListener("submit", addExpense);
+  document.querySelectorAll(".tab").forEach(t=>{
+    t.addEventListener("click", ()=>{
+      chartView = t.dataset.view;
+      document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+      t.classList.add("active");
+      renderChart(computeAll());
+    });
+  });
+  document.getElementById("exportBtn").addEventListener("click", exportBackup);
+  document.getElementById("importBtn").addEventListener("click", ()=> document.getElementById("importFile").click());
+  document.getElementById("importFile").addEventListener("change", e=>{
+    if(e.target.files[0]) importBackup(e.target.files[0]);
+    e.target.value = "";
+  });
+});
+</script>
+</body>
+</html>
